@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Install packages configure build settings.
+# Configure build settings.
 #
 
 PROG=$(basename $0)
@@ -75,7 +75,7 @@ if [ -z $product ]; then
     exit 1
 fi
 
-echo "Building for product: $product"
+echo "Configuring build for product: $product"
 
 if [ $SKIP_SECRETS -eq 0 ]; then
     echo "Fetching device/firmware secrets..."
@@ -94,11 +94,6 @@ if [ $SKIP_SECRETS -eq 0 ]; then
 fi
 
 set -e
-
-## Fetch package feeds
-cp bnx/feeds/$product.conf feeds.conf
-./scripts/feeds update -a
-./scripts/feeds install -a
 
 ## Configure build settings
 cp bnx/configs/$product.config .config
