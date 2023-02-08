@@ -10,7 +10,9 @@ print_help() {
     echo "product can be one of:"
     while read -r model; do echo "  * $model"; done < bnx/models
     echo "options:"
-    echo "  --skip-secrets        : skip fetching device/firmware secrets"
+    echo "  --version <version>     : set version for release builds (default is development)"
+    echo "  --bnxcloud <deployment> : connect to specified bnxcloud deployment (default is bnxcloud-beta)"
+    echo "  --skip-secrets          : skip fetching device/firmware secrets"
 }
 
 print_fetch_secret_error() {
@@ -40,6 +42,8 @@ fetch_secret() {
 }
 
 SKIP_SECRETS=0
+version="development"
+bnxcloud="bnxcloud-beta"
 
 while [[ $# -gt 0 ]]; do
     key="$1"
@@ -47,6 +51,11 @@ while [[ $# -gt 0 ]]; do
     case $key in
         --product)
         product="$2"
+        shift # past argument
+        shift # past value
+        ;;
+        --version)
+        version="$2"
         shift # past argument
         shift # past value
         ;;
@@ -97,7 +106,8 @@ set -e
 
 ## Configure build settings
 cp bnx/configs/$product.config .config
+echo 'CONFIG_VERSION_NUMBER="'$version'"' >> .config
+echo 'CONFIG_BNX_CLOUD_API_ENDPOINT="'$bnxcloud'"' >> .config
 echo 'CONFIG_BNX_DEVICE_SECRET="'$device_secret'"' >> .config
 echo 'CONFIG_BNX_FIRMWARE_SECRET="'$firmware_secret'"' >> .config
 make defconfig
-
