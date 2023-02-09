@@ -1824,6 +1824,17 @@ define Device/ubnt_usw-flex
 endef
 TARGET_DEVICES += ubnt_usw-flex
 
+define Device/unielec_u7621-02-ax
+  $(Device/dsa-migration)
+  $(Device/uimage-lzma-loader)
+  DEVICE_VENDOR := unielec
+  DEVICE_MODEL := U7621-02-AX
+  DEVICE_PACKAGES += kmod-usb3
+  IMAGE_SIZE := 65216k
+  UIMAGE_NAME := unielec_u7621-02-ax
+endef
+TARGET_DEVICES += unielec_u7621-02-ax
+
 define Device/unielec_u7621-01-16m
   $(Device/dsa-migration)
   $(Device/uimage-lzma-loader)
