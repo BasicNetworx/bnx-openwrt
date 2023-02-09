@@ -104,10 +104,12 @@ fi
 
 set -e
 
+apiendpoint="https://api.$bnxcloud.com"
+
 ## Configure build settings
 cp bnx/configs/$product.config .config
 echo 'CONFIG_VERSION_NUMBER="'$version'"' >> .config
-echo 'CONFIG_BNX_CLOUD_API_ENDPOINT="'$bnxcloud'"' >> .config
+echo 'CONFIG_BNX_CLOUD_API_ENDPOINT="'$apiendpoint'"' >> .config
 echo 'CONFIG_BNX_DEVICE_SECRET="'$device_secret'"' >> .config
 echo 'CONFIG_BNX_FIRMWARE_SECRET="'$firmware_secret'"' >> .config
 make defconfig
