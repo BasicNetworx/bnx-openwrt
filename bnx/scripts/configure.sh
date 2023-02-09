@@ -10,9 +10,10 @@ print_help() {
     echo "product can be one of:"
     while read -r model; do echo "  * $model"; done < bnx/models
     echo "options:"
-    echo "  --version <version>     : set version for release builds (default is development)"
-    echo "  --bnxcloud <deployment> : connect to specified bnxcloud deployment (default is bnxcloud-beta)"
-    echo "  --skip-secrets          : skip fetching device/firmware secrets"
+    echo "  --version <version>        : set version for release builds (default is development)"
+    echo "  --bnxcloud <deployment>    : connect to specified bnxcloud deployment (default is bnxcloud-beta)"
+    echo "  --device-secret <secret>   : use provided device secret"
+    echo "  --firmware-secret <secret> : use provided firmware secret"
 }
 
 print_fetch_secret_error() {
@@ -41,7 +42,6 @@ fetch_secret() {
     return 0
 }
 
-SKIP_SECRETS=0
 version="development"
 bnxcloud="bnxcloud-beta"
 
@@ -59,9 +59,20 @@ while [[ $# -gt 0 ]]; do
         shift # past argument
         shift # past value
         ;;
-        --skip-secrets)
-        SKIP_SECRETS=1
+        --bnxcloud)
+        bnxcloud="$2"
         shift # past argument
+        shift # past value
+        ;;
+        --device-secret)
+        device_secret="$2"
+        shift # past argument
+        shift # past value
+        ;;
+        --firmware-secret)
+        firmware_secret="$2"
+        shift # past argument
+        shift # past value
         ;;
         --help)
         print_help
@@ -74,8 +85,6 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-device_secret="missing"
-firmware_secret="missing"
 product=$(cat bnx/models | grep "^$product$")
 
 if [ -z $product ]; then
@@ -86,20 +95,22 @@ fi
 
 echo "Configuring build for product: $product"
 
-if [ $SKIP_SECRETS -eq 0 ]; then
-    echo "Fetching device/firmware secrets..."
+if [ -z "$device_secret" ]; then
+    echo "Fetching device secret..."
     fetch_secret "bnx-device-secret" device_secret
     if [ $? -ne 0 ]; then
         print_fetch_secret_error
         exit 1
     fi
+fi
+
+if [ -z "$firmware_secret" ]; then
+    echo "Fetching firmware secret..."
     fetch_secret "bnx-firmware-secret" firmware_secret
     if [ $? -ne 0 ]; then
         print_fetch_secret_error
         exit 1
     fi
-
-    echo "Successfully fetched device/firmware secrets."
 fi
 
 set -e

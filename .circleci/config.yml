@@ -1,0 +1,48 @@
+version: 2.1
+orbs:
+  aws-cli: circleci/aws-cli@1.2.1
+jobs:
+  build:
+    docker:
+      - image: bnxdev/bnx-firmware-builder
+    resource_class: xlarge
+    working_directory: /mnt/ramdisk
+    steps:
+      - checkout
+      - run: bash .circleci/build.sh $CIRCLE_TAG $CIRCLE_BUILD_NUM $BNX_DEVICE_SECRET $BNX_FIRMWARE_SECRET workspace
+      - persist_to_workspace:
+          root: workspace
+          paths:
+            - '*'
+  upload:
+    parameters:
+    executor: aws-cli/default
+    steps:
+      - attach_workspace:
+          at: /tmp/workspace
+      - aws-cli/setup
+      - run: bash /tmp/workspace/deploy.sh /tmp/workspace
+workflows:
+  version: 2
+  bnxfw:
+    jobs:
+      - build:
+          name: BuildFw
+          filters:
+            tags:
+              only:
+                - /bnx\/release\/.*/
+            branches:
+              ignore:
+                - /.*/
+      - upload:
+          name: UploadFw
+          requires:
+            - BuildFw
+          filters:
+            tags:
+              only:
+                - /bnx\/release\/.*/
+            branches:
+              ignore:
+                - /.*/
