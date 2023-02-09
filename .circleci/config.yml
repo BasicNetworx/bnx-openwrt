@@ -9,13 +9,15 @@ jobs:
     working_directory: /mnt/ramdisk
     steps:
       - checkout
-      - run: bash .circleci/build.sh $CIRCLE_TAG $CIRCLE_BUILD_NUM $BNX_DEVICE_SECRET $BNX_FIRMWARE_SECRET workspace
+      - add_ssh_keys:
+          fingerprints:
+            - "26:2e:1f:27:d4:59:d7:27:23:0c:05:7c:cf:0e:d3:8b"
+      - run: bash .circleci/build.sh $CIRCLE_TAG $CIRCLE_BUILD_NUM workspace $BNX_DEVICE_SECRET $BNX_FIRMWARE_SECRET
       - persist_to_workspace:
           root: workspace
           paths:
             - '*'
   upload:
-    parameters:
     executor: aws-cli/default
     steps:
       - attach_workspace:

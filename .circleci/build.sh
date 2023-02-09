@@ -4,9 +4,9 @@ set -e
 # format of tag needs to be "bnx/release/<model>/<deployment>/<version>"
 TAG=$1
 BUILD_NUM=$2
-DEVICE_SECRET=$3
-FIRMWARE_SECRET=$4
-WORKSPACE_FOLDER=$5
+WORKSPACE_FOLDER=$3
+DEVICE_SECRET=$4
+FIRMWARE_SECRET=$5
 
 MODEL=$(echo $TAG | cut -f3 -d/)
 if [ -z "$MODEL" ]; then
@@ -37,6 +37,8 @@ fi
 
 if [ "$MODEL" == "BNX-2000" ]; then
     PREBUILT_VERSION="mips_24kc_gcc-7.5.0_musl"
+elif [[ "$MODEL" == "BNX-2500B1" || "$MODEL" == "BNX-2500B2" ]]; then
+    PREBUILT_VERSION="mipsel_24kc_gcc-11.2.0_musl"
 fi
 
 if [ ! -z "$PREBUILT_VERSION" ]; then
@@ -46,9 +48,16 @@ if [ ! -z "$PREBUILT_VERSION" ]; then
 fi
 
 FW_VERSION="$VERSION-$DEPLOYMENT.$BUILD_NUM"
+SECRETS_ARGS=
+if [ ! -z "$DEVICE_SECRET" ]; then
+    SECRETS_ARGS="$SECRET_ARGS --device-secret $DEVICE_SECRET"
+fi
+if [ ! -z "$FIRMWARE_SECRET" ]; then
+    SECRETS_ARGS="$SECRET_ARGS --firmware-secret $FIRMWARE_SECRET"
+fi
 
 ./bnx/scripts/install.sh --product $MODEL
-./bnx/scripts/configure.sh --product $MODEL --bnxcloud $BNXCLOUD --version $FW_VERSION --device-secret $DEVICE_SECRET --firmware-secret $FIRMWARE_SECRET
+./bnx/scripts/configure.sh --product $MODEL --bnxcloud $BNXCLOUD --version $FW_VERSION $SECRETS_ARGS
 make -j12 target/compile package/compile package/install target/install package/index
 
 mkdir -p $WORKSPACE_FOLDER
@@ -61,6 +70,6 @@ cp .circleci/deploy.sh $WORKSPACE_FOLDER
 # artifacts that will be stored
 ARTIFACT_FOLDER=$WORKSPACE_FOLDER/artifacts
 mkdir -p $ARTIFACT_FOLDER
-[ -f bin/targets/*/*/*-sysupgrade.bin ] && cp bin/targets/*/*/*-sysupgrade.bin $ARTIFACT_FOLDER/${MODEL}-firmware-${FW_VERSION}-sysupgrade.bin
-[ -f bin/targets/*/*/*-factory.bin ] && cp bin/targets/*/*/*-factory.bin $ARTIFACT_FOLDER/${MODEL}-firmware-${FW_VERSION}-factory.bin
+[ -f bin/targets/*/*/*-sysupgrade.bin ] && cp bin/targets/*/*/*-sysupgrade.bin $ARTIFACT_FOLDER/${MODEL}-firmware-v${FW_VERSION}-sysupgrade.bin
+[ -f bin/targets/*/*/*-factory.bin ] && cp bin/targets/*/*/*-factory.bin $ARTIFACT_FOLDER/${MODEL}-firmware-v${FW_VERSION}-factory.bin
 [ -d bin/packages ] && cp -R bin/packages $ARTIFACT_FOLDER/
