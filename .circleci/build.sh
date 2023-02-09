@@ -48,16 +48,16 @@ if [ ! -z "$PREBUILT_VERSION" ]; then
 fi
 
 FW_VERSION="$VERSION-$DEPLOYMENT.$BUILD_NUM"
-SECRETS_ARGS=
+SECRET_ARGS=
 if [ ! -z "$DEVICE_SECRET" ]; then
-    SECRETS_ARGS="$SECRET_ARGS --device-secret $DEVICE_SECRET"
+    SECRET_ARGS="$SECRET_ARGS --device-secret $DEVICE_SECRET"
 fi
 if [ ! -z "$FIRMWARE_SECRET" ]; then
-    SECRETS_ARGS="$SECRET_ARGS --firmware-secret $FIRMWARE_SECRET"
+    SECRET_ARGS="$SECRET_ARGS --firmware-secret $FIRMWARE_SECRET"
 fi
 
 ./bnx/scripts/install.sh --product $MODEL
-./bnx/scripts/configure.sh --product $MODEL --bnxcloud $BNXCLOUD --version $FW_VERSION $SECRETS_ARGS
+./bnx/scripts/configure.sh --product $MODEL --bnxcloud $BNXCLOUD --version $FW_VERSION $SECRET_ARGS
 make -j12 target/compile package/compile package/install target/install package/index
 
 mkdir -p $WORKSPACE_FOLDER
