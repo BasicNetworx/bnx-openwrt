@@ -38,7 +38,7 @@
 	};
 
 	chosen {
-		bootargs = "console=ttyS0,57600";
+		bootargs = "console=ttyS0,115200";
 	};
 
 	pll: pll {
@@ -457,7 +457,7 @@
 		mediatek,ethsys = <&sysc>;
 
 		pinctrl-names = "default";
-		pinctrl-0 = <&mdio_pins>, <&rgmii1_pins>, <&rgmii2_pins>;
+		pinctrl-0 = <&mdio_pins>, <&rgmii1_pins>;
 
 		gmac0: mac@0 {
 			compatible = "mediatek,eth-mac";
